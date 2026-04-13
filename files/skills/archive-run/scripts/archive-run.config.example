@@ -1,0 +1,18 @@
+# .claude/archive-run.config
+# Which metric collectors to run at archival time.
+# Each line is a collector name (filename without .sh extension).
+# Lines starting with # are comments.
+#
+# Uncomment the collectors relevant to your project.
+# The 'git' collector is universal and recommended for all projects.
+
+git
+
+# Language-specific collectors (uncomment what applies):
+# python
+# node
+# go
+# rust
+
+# Code duplication (jscpd) is NOT a collector script — run it manually.
+# See archive-run SKILL.md for the recommended command with --min-lines 5 --min-tokens 50.

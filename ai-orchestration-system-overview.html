@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4th Layer Engineering: AI Orchestration System</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --card: #1a1d27;
+        --border: #2a2d3a;
+        --accent: #6c63ff;
+        --accent2: #00d4aa;
+        --accent3: #ff6b6b;
+        --accent4: #ffd93d;
+        --text: #e4e4e7;
+        --muted: #8b8d97;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      /* Navigation */
+      .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(15, 17, 23, 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-brand {
+        font-size: 14px;
+        font-family: "Consolas", monospace;
+        color: var(--accent2);
+        letter-spacing: 1px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        font-family: "Consolas", monospace;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+        background: var(--card);
+      }
+
+      /* Slides */
+      .slide {
+        min-height: 100vh;
+        padding: 80px 80px 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-bottom: 1px solid var(--border);
+        position: relative;
+      }
+      .slide-number {
+        position: absolute;
+        top: 80px;
+        right: 40px;
+        font-size: 14px;
+        color: var(--muted);
+        font-family: "Consolas", monospace;
+      }
+
+      /* Typography */
+      h1 {
+        font-size: 52px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      h2 {
+        font-size: 38px;
+        font-weight: 600;
+        margin-bottom: 32px;
+        color: var(--text);
+      }
+      h3 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--accent2);
+      }
+      .subtitle {
+        font-size: 22px;
+        color: var(--muted);
+        margin-bottom: 40px;
+      }
+      .mono {
+        font-family: "Consolas", monospace;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 14px;
+      }
+
+      /* Stat cards */
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin-top: 40px;
+      }
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 44px;
+        font-weight: 700;
+        color: var(--accent);
+        font-family: "Consolas", monospace;
+      }
+      .stat-number.green {
+        color: var(--accent2);
+      }
+      .stat-number.yellow {
+        color: var(--accent4);
+      }
+      .stat-number.red {
+        color: var(--accent3);
+      }
+      .stat-label {
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      /* Layout helpers */
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        margin: 20px 0;
+      }
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        margin: 20px 0;
+      }
+      .col-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+      }
+      .col-card ul {
+        list-style: none;
+        padding: 0;
+      }
+      .col-card li {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 15px;
+      }
+      .col-card li:last-child {
+        border-bottom: none;
+      }
+      .col-card li::before {
+        content: ">";
+        color: var(--accent2);
+        margin-right: 10px;
+        font-family: "Consolas", monospace;
+        font-weight: bold;
+      }
+
+      /* Callout */
+      .callout {
+        background: linear-gradient(
+          135deg,
+          rgba(108, 99, 255, 0.1),
+          rgba(0, 212, 170, 0.1)
+        );
+        border: 1px solid var(--accent);
+        border-radius: 12px;
+        padding: 24px 32px;
+        margin: 24px 0;
+        font-size: 18px;
+        line-height: 1.7;
+      }
+      .callout em {
+        color: var(--accent2);
+        font-style: normal;
+        font-weight: 600;
+      }
+      .callout.warn {
+        border-color: var(--accent4);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 217, 61, 0.08),
+          rgba(255, 107, 107, 0.06)
+        );
+      }
+
+      /* Pattern cards */
+      .pattern-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin: 24px 0;
+      }
+      .pattern-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .pattern-card h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .pattern-card p {
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .pattern-example {
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-family: "Consolas", monospace;
+        font-size: 13px;
+        color: var(--accent2);
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+
+      /* Tags */
+      .tag {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: "Consolas", monospace;
+      }
+      .tag.opus {
+        background: rgba(108, 99, 255, 0.2);
+        color: var(--accent);
+      }
+      .tag.sonnet {
+        background: rgba(0, 212, 170, 0.2);
+        color: var(--accent2);
+      }
+      .tag.haiku {
+        background: rgba(255, 217, 61, 0.2);
+        color: var(--accent4);
+      }
+      .tag.codex {
+        background: rgba(255, 107, 107, 0.2);
+        color: var(--accent3);
+      }
+      .tag.hook {
+        background: rgba(108, 99, 255, 0.15);
+        color: #9d97ff;
+      }
+      .tag.file {
+        background: rgba(0, 212, 170, 0.15);
+        color: var(--accent2);
+      }
+
+      /* Architecture diagram */
+      .arch-diagram {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 40px;
+        margin: 24px 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .arch-layer {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 16px 0;
+        position: relative;
+      }
+      .arch-layer-label {
+        width: 160px;
+        text-align: right;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+      .arch-layer-content {
+        flex: 1;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .arch-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 18px;
+        font-size: 13px;
+        font-family: "Consolas", monospace;
+        position: relative;
+        transition: border-color 0.2s;
+      }
+      .arch-box:hover {
+        border-color: var(--accent);
+      }
+      .arch-box.primary {
+        border-color: var(--accent);
+        border-width: 2px;
+      }
+      .arch-box.secondary {
+        border-color: var(--accent2);
+      }
+      .arch-box.warn {
+        border-color: var(--accent4);
+      }
+      .arch-box .label {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+      }
+      .arch-divider {
+        border: none;
+        border-top: 1px dashed var(--border);
+        margin: 20px 0 20px 176px;
+      }
+
+      /* Flow diagram */
+      .flow-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin: 24px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .flow-step {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px 24px;
+        text-align: center;
+        min-width: 140px;
+      }
+      .flow-step .step-num {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 6px;
+      }
+      .flow-step .step-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .flow-step .step-detail {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .flow-step.active {
+        border-color: var(--accent);
+      }
+      .flow-step.active .step-title {
+        color: var(--accent);
+      }
+      .flow-arrow {
+        font-size: 20px;
+        color: var(--muted);
+        padding: 0 8px;
+        flex-shrink: 0;
+      }
+
+      /* Hook table */
+      .hook-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 14px;
+      }
+      .hook-table th {
+        text-align: left;
+        padding: 10px 16px;
+        border-bottom: 2px solid var(--border);
+        color: var(--muted);
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+      .hook-table td {
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      /* Role circles */
+      .role-ring {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin: 30px 0;
+        flex-wrap: wrap;
+      }
+      .role-circle {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: border-color 0.2s;
+      }
+      .role-circle:hover {
+        border-color: var(--accent);
+      }
+      .role-circle .icon {
+        font-size: 28px;
+        margin-bottom: 6px;
+      }
+      .role-circle .role-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+      .role-circle .role-model {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Connector lines */
+      .connector-section {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        margin: 24px 0;
+      }
+      .connector-left {
+        width: 48%;
+        padding-right: 32px;
+      }
+      .connector-mid {
+        width: 4%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+      .connector-mid::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--accent), var(--accent2));
+        opacity: 0.4;
+      }
+      .connector-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        position: relative;
+        z-index: 1;
+        margin: 20px 0;
+      }
+      .connector-right {
+        width: 48%;
+        padding-left: 32px;
+      }
+
+      /* Numbered list */
+      .numbered-item {
+        display: flex;
+        gap: 20px;
+        margin: 16px 0;
+        align-items: flex-start;
+      }
+      .numbered-item .num {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .numbered-item .num.green {
+        background: var(--accent2);
+      }
+      .numbered-item .num.yellow {
+        background: var(--accent4);
+        color: var(--bg);
+      }
+      .numbered-item .num.red {
+        background: var(--accent3);
+      }
+      .numbered-item .content h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .numbered-item .content p {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      /* Layer comparison */
+      .layer-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin: 32px 0;
+      }
+      .layer-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .layer-num {
+        width: 60px;
+        text-align: right;
+        padding-right: 16px;
+        font-family: "Consolas", monospace;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .layer-bar {
+        flex: 1;
+        padding: 16px 24px;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 500;
+        position: relative;
+      }
+      .layer-bar.l1 {
+        background: rgba(108, 99, 255, 0.08);
+        border: 1px solid rgba(108, 99, 255, 0.2);
+      }
+      .layer-bar.l2 {
+        background: rgba(108, 99, 255, 0.12);
+        border: 1px solid rgba(108, 99, 255, 0.3);
+      }
+      .layer-bar.l3 {
+        background: rgba(108, 99, 255, 0.18);
+        border: 1px solid rgba(108, 99, 255, 0.4);
+      }
+      .layer-bar.l4 {
+        background: linear-gradient(
+          90deg,
+          rgba(108, 99, 255, 0.25),
+          rgba(0, 212, 170, 0.15)
+        );
+        border: 2px solid var(--accent);
+      }
+      .layer-bar .layer-era {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .layer-bar .layer-badge {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: var(--accent2);
+        font-family: "Consolas", monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <div class="nav">
+      <div class="nav-brand">4TH LAYER ENGINEERING</div>
+      <div class="nav-links">
+        <a href="#concept">Concept</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#runs">Runs</a>
+        <a href="#agents">Agents</a>
+        <a href="#hooks">Hooks</a>
+        <a href="#memory">Memory</a>
+        <a href="#models">Models</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#role">Human Role</a>
+      </div>
+    </div>
+
+    <!-- SLIDE 1: Title -->
+    <div
+      class="slide"
+      id="title"
+      style="justify-content: center; align-items: center; text-align: center"
+    >
+      <span class="slide-number">01</span>
+      <h1>4th Layer Engineering</h1>
+      <p class="subtitle">
+        An AI orchestration system for structured,<br />resumable, multi-agent
+        development workflows
+      </p>
+
+      <div class="layer-stack" style="max-width: 700px; width: 100%">
+        <div class="layer-row">
+          <div class="layer-num">L1</div>
+          <div class="layer-bar l1">
+            Machine Code
+            <div class="layer-era">
+              1940s &ndash; direct hardware instructions
+            </div>
+          </div>
+        </div>
+        <div class="layer-row">
+          <div class="layer-num">L2</div>
+          <div class="layer-bar l2">
+            Assembly
+            <div class="layer-era">1950s &ndash; human-readable mnemonics</div>
+          </div>
+        </div>
+        <div class="layer-row">
+          <div class="layer-num">L3</div>
+          <div class="layer-bar l3">
+            Compiled / Interpreted Languages
+            <div class="layer-era">
+              1960s&ndash;now &ndash; abstracted logic
+            </div>
+          </div>
+        </div>
+        <div class="layer-row">
+          <div class="layer-num">L4</div>
+          <div class="layer-bar l4">
+            <strong>LLM Agent Orchestration</strong>
+            <div class="layer-era">
+              2024+ &ndash; the codebase, docs, hooks, and conventions
+              <em>are</em> the source code that programs the agents
+            </div>
+            <span class="layer-badge">&#9668; you are here</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="muted small" style="margin-top: 40px">
+        Dan Guilliams &middot; 4th Layer Engineering &middot; 2026
+      </p>
+    </div>
+
+    <!-- SLIDE 2: The Core Concept -->
+    <div class="slide" id="concept">
+      <span class="slide-number">02</span>
+      <h2>The Core Idea</h2>
+      <p class="subtitle">
+        Not the AI model &mdash; the
+        <em style="color: var(--accent2)">system around it</em>.
+      </p>
+
+      <div class="two-col">
+        <div class="col-card" style="border-left: 3px solid var(--accent3)">
+          <h3 style="color: var(--accent3)">Without a System</h3>
+          <ul>
+            <li>Chat with an AI, get some code</li>
+            <li>Context window fills up &rarr; AI forgets the plan</li>
+            <li>Session ends &rarr; all progress lost</li>
+            <li>No review &rarr; bugs ship as "findings"</li>
+            <li>One model &rarr; one set of blind spots</li>
+            <li>No scope document &rarr; endless scope creep</li>
+          </ul>
+        </div>
+        <div class="col-card" style="border-left: 3px solid var(--accent2)">
+          <h3 style="color: var(--accent2)">With This System</h3>
+          <ul>
+            <li>Structured runs with versioned scope &amp; task logs</li>
+            <li>Context compacts &rarr; agent recovers in ~10 seconds</li>
+            <li>Session ends &rarr; resume via Run ID, everything on disk</li>
+            <li>Adversarial review catches real bugs before delivery</li>
+            <li>Multiple models cover each other's blind spots</li>
+            <li>SPEC versioning prevents scope creep &amp; retry loops</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        The models are commodity. The value is in the
+        <em>orchestration infrastructure</em>: run directories, SPEC versioning,
+        hooks, multi-agent coordination, and compaction-proof memory. This
+        system makes AI work <em>durable, resumable, and reviewable</em>.
+      </div>
+    </div>
+
+    <!-- SLIDE 3: System Architecture -->
+    <div class="slide" id="architecture">
+      <span class="slide-number">03</span>
+      <h2>System Architecture</h2>
+      <p class="subtitle">
+        Every component has a job. Together, they make agent work reliable.
+      </p>
+
+      <div class="arch-diagram">
+        <div class="arch-layer">
+          <div class="arch-layer-label">System Prompt</div>
+          <div class="arch-layer-content">
+            <div class="arch-box primary">
+              <div class="label">Loaded Every Turn</div>
+              CLAUDE.md
+            </div>
+            <div class="arch-box">
+              <div class="label">Auto-Loaded</div>
+              MEMORY.md
+            </div>
+            <div class="arch-box">
+              <div class="label">Session-Scoped</div>
+              settings.local.json
+            </div>
+          </div>
+        </div>
+
+        <hr class="arch-divider" />
+
+        <div class="arch-layer">
+          <div class="arch-layer-label">Run Infrastructure</div>
+          <div class="arch-layer-content">
+            <div class="arch-box secondary">
+              <div class="label">Scope Contract</div>
+              SPEC_vN.md
+            </div>
+            <div class="arch-box secondary">
+              <div class="label">Progress Narrative</div>
+              TASK_LOG.md
+            </div>
+            <div class="arch-box secondary">
+              <div class="label">Discovery Archive</div>
+              FINDINGS_REGISTRY.md
+            </div>
+          </div>
+        </div>
+
+        <hr class="arch-divider" />
+
+        <div class="arch-layer">
+          <div class="arch-layer-label">Agent Layer</div>
+          <div class="arch-layer-content">
+            <div class="arch-box">
+              <div class="label">Orchestrator</div>
+              Main Agent (Opus)
+            </div>
+            <div class="arch-box">
+              <div class="label">Workers</div>
+              Subagents (Any Model)
+            </div>
+            <div class="arch-box warn">
+              <div class="label">Quality Gate</div>
+              Adversarial Reviewer
+            </div>
+          </div>
+        </div>
+
+        <hr class="arch-divider" />
+
+        <div class="arch-layer">
+          <div class="arch-layer-label">Guardrails</div>
+          <div class="arch-layer-content">
+            <div class="arch-box">
+              <div class="label">PreToolUse</div>
+              Directory Protocol Hook
+            </div>
+            <div class="arch-box">
+              <div class="label">PreToolUse</div>
+              Agent Rewrite Hook
+            </div>
+            <div class="arch-box">
+              <div class="label">UserPromptSubmit</div>
+              Task Log Reminder
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The Workflow -->
+    <div class="slide" id="workflow">
+      <span class="slide-number">04</span>
+      <h2>The Workflow: How a Task Flows Through the System</h2>
+
+      <div class="flow-horizontal">
+        <div class="flow-step active">
+          <div class="step-num">Step 1</div>
+          <div class="step-title">Scope</div>
+          <div class="step-detail">
+            Write SPEC_v1.md<br />Define success criteria
+          </div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <div class="step-num">Step 2</div>
+          <div class="step-title">Init Run</div>
+          <div class="step-detail">
+            ./init-run.sh slug<br />Creates timestamped dir
+          </div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <div class="step-num">Step 3</div>
+          <div class="step-title">Build</div>
+          <div class="step-detail">
+            Orchestrate agents<br />Log to TASK_LOG.md
+          </div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <div class="step-num">Step 4</div>
+          <div class="step-title">Review</div>
+          <div class="step-detail">
+            Adversarial review<br />Catch bugs &amp; errors
+          </div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <div class="step-num">Step 5</div>
+          <div class="step-title">Deliver</div>
+          <div class="step-detail">
+            Validate &amp; archive<br />Update ARCHIVE.md
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-grid" style="margin-top: 32px">
+        <div class="pattern-card">
+          <h3>Scope Before Code</h3>
+          <p>
+            The SPEC is written before any implementation starts. It defines
+            what success looks like, constraints, and "Don't Retry" sections
+            that prevent the agent from repeating failed approaches.
+          </p>
+          <div class="pattern-example">
+            ## Success Criteria - Parse all 1,389 records without error -
+            Produce quality score per department ## Don't Retry - Regex-only
+            date parsing (fails on mixed formats, use dateutil) - Single-pass
+            NLP (misses co-occurrence)
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>The Recovery Loop</h3>
+          <p>
+            When context compacts or a session swaps, the agent recovers
+            everything from disk in seconds &mdash; no re-explaining needed.
+          </p>
+          <div class="pattern-example">
+            1. Read CLAUDE.md → Active Tasks table → Run ID 2. Read
+            SPEC_v(latest).md → Scope, constraints, Don't Retry 3. Read
+            TASK_LOG.md → Exactly where we left off 4. Read FINDINGS_REGISTRY.md
+            → All discoveries so far Recovery time: ~10 seconds
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: RUN Directories -->
+    <div class="slide" id="runs">
+      <span class="slide-number">05</span>
+      <h2>RUN Directories: Isolated, Timestamped Workstreams</h2>
+      <p class="subtitle">
+        Every task gets its own directory. Agents crash &mdash; the directory
+        survives.
+      </p>
+
+      <div class="two-col">
+        <div>
+          <div class="pattern-card" style="margin-bottom: 24px">
+            <h3>Directory Structure</h3>
+            <p>
+              Each run is an isolated workstream with standardized files that
+              any agent can read to understand the current state.
+            </p>
+            <div class="pattern-example">
+              runs/CLAUDE-RUNS/ ├── ARCHIVE.md ← completed runs log │ ├──
+              RUN-20260304-1112-feature-auth/ │ ├── SPEC_v1.md ← scope contract
+              │ ├── SPEC_v2.md ← scope evolved │ ├── TASK_LOG.md ← progress
+              narrative │ ├── FINDINGS_REGISTRY.md ← all discoveries │ └──
+              subagents/ │ ├── 20260304-1130-investigation/ │ │ └── FINDINGS.md
+              │ ├── 20260304-1145-parser-impl/ │ │ └── FINDINGS.md │ └──
+              20260304-1200-review/ │ └── FINDINGS.md │ └──
+              RUN-20260304-1456-bugfix-api/ ├── SPEC_v1.md ├── TASK_LOG.md └──
+              subagents/ ...
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="pattern-card" style="margin-bottom: 24px">
+            <h3>SPEC Versioning</h3>
+            <p>
+              SPECs are immutable. When scope changes, a new version is created.
+              The agent reads the latest version to know what success looks
+              like.
+            </p>
+            <div class="pattern-example">
+              SPEC_v1.md → Initial architecture SPEC_v2.md → Added council
+              approach SPEC_v3.md → Post-council refinements SPEC_v4.md →
+              Approved final architecture Each version records: - What changed
+              and why - New constraints discovered - "Don't Retry" additions
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <h3>init-run.sh</h3>
+            <p>
+              One command creates a fully templated run directory with SPEC and
+              TASK_LOG ready to fill in.
+            </p>
+            <div class="pattern-example">
+              $ ./init-run.sh feature-auth Created: runs/CLAUDE-RUNS/
+              RUN-20260304-1112-feature-auth/ ├── SPEC_v1.md (template) └──
+              TASK_LOG.md (template)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Agent Orchestration -->
+    <div class="slide" id="agents">
+      <span class="slide-number">06</span>
+      <h2>Agent Orchestration: File-Based, Not Context-Based</h2>
+      <p class="subtitle">
+        Agents communicate through files on disk &mdash; not shared conversation
+        context.
+      </p>
+
+      <div class="arch-diagram">
+        <div style="text-align: center; margin-bottom: 32px">
+          <div
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 32px;
+              flex-wrap: wrap;
+              justify-content: center;
+            "
+          >
+            <div style="text-align: center">
+              <div style="font-size: 32px; margin-bottom: 4px">
+                &#x1f9d1;&#x200d;&#x1f4bb;
+              </div>
+              <div style="font-size: 14px; font-weight: 600">Human</div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Steers, reviews
+              </div>
+            </div>
+            <div style="font-size: 24px; color: var(--muted)">&darr;</div>
+            <div style="text-align: center">
+              <div style="font-size: 32px; margin-bottom: 4px">&#x1f3af;</div>
+              <div style="font-size: 14px; font-weight: 600">Orchestrator</div>
+              <div style="font-size: 11px; color: var(--muted)">
+                Delegates, synthesizes
+              </div>
+            </div>
+            <div style="font-size: 24px; color: var(--muted)">&darr;</div>
+            <div style="display: flex; gap: 16px">
+              <div style="text-align: center">
+                <div style="font-size: 28px; margin-bottom: 4px">&#x1f50d;</div>
+                <div style="font-size: 12px">Scout</div>
+              </div>
+              <div style="text-align: center">
+                <div style="font-size: 28px; margin-bottom: 4px">&#x1f528;</div>
+                <div style="font-size: 12px">Builder</div>
+              </div>
+              <div style="text-align: center">
+                <div style="font-size: 28px; margin-bottom: 4px">&#x1f4dd;</div>
+                <div style="font-size: 12px">Analyst</div>
+              </div>
+              <div style="text-align: center">
+                <div style="font-size: 28px; margin-bottom: 4px">
+                  &#x26a0;&#xfe0f;
+                </div>
+                <div style="font-size: 12px">Reviewer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <div
+            style="
+              background: var(--bg);
+              border: 1px solid var(--accent);
+              border-radius: 8px;
+              padding: 16px 20px;
+              max-width: 260px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+              "
+            >
+              Key Principle
+            </div>
+            <div style="font-size: 14px">
+              Each subagent writes to its <strong>own directory</strong>. The
+              orchestrator reads FINDINGS.md files. Never shares context
+              directly.
+            </div>
+          </div>
+          <div
+            style="
+              background: var(--bg);
+              border: 1px solid var(--accent2);
+              border-radius: 8px;
+              padding: 16px 20px;
+              max-width: 260px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                color: var(--accent2);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+              "
+            >
+              Why It Works
+            </div>
+            <div style="font-size: 14px">
+              Agents can be <strong>any model</strong>. They can crash, compact,
+              or swap without losing work. The file system is the source of
+              truth.
+            </div>
+          </div>
+          <div
+            style="
+              background: var(--bg);
+              border: 1px solid var(--accent4);
+              border-radius: 8px;
+              padding: 16px 20px;
+              max-width: 260px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                color: var(--accent4);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+              "
+            >
+              Noise Isolation
+            </div>
+            <div style="font-size: 14px">
+              Subagent exploration generates noise. That noise stays in
+              <strong>their directory</strong>, not the orchestrator's context
+              window.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        File-based coordination is the core insight. The orchestrator says
+        <em>"investigate X, write to your FINDINGS.md"</em> &mdash; not
+        <em>"here's my entire conversation, continue from here."</em> This means
+        subagents get clean context and the orchestrator stays focused.
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Hook System -->
+    <div class="slide" id="hooks">
+      <span class="slide-number">07</span>
+      <h2>The Hook System: Automated Guardrails</h2>
+      <p class="subtitle">
+        Shell scripts that fire on agent actions &mdash; enforcing conventions
+        without supervision.
+      </p>
+
+      <table class="hook-table">
+        <tr>
+          <th>Hook</th>
+          <th>Fires On</th>
+          <th>What It Does</th>
+        </tr>
+        <tr>
+          <td><span class="tag hook">subagent-directory-protocol</span></td>
+          <td>PreToolUse &rarr; Agent spawn</td>
+          <td>
+            Injects the rule:
+            <em>"Create a timestamped directory, write FINDINGS.md there."</em>
+            Every subagent automatically follows the directory protocol without
+            being told in the prompt.
+          </td>
+        </tr>
+        <tr>
+          <td><span class="tag hook">force-general-purpose-agent</span></td>
+          <td>PreToolUse &rarr; Agent spawn</td>
+          <td>
+            Rewrites read-only agent types (Explore, Plan) to "general-purpose"
+            so they can write FINDINGS.md. Prevents agents from being unable to
+            deliver their work.
+          </td>
+        </tr>
+        <tr>
+          <td><span class="tag hook">subagent-context</span></td>
+          <td>PreToolUse &rarr; Agent spawn</td>
+          <td>
+            Injects project-specific identity, voice, and context into every
+            subagent. Ensures consistency without bloating each prompt.
+          </td>
+        </tr>
+        <tr>
+          <td><span class="tag hook">plan-mode-reminder</span></td>
+          <td>PreToolUse &rarr; EnterPlanMode</td>
+          <td>
+            Reminds agents of planning discipline: write the plan to a file, not
+            just in conversation. Prevents plans from being lost to compaction.
+          </td>
+        </tr>
+        <tr>
+          <td><span class="tag hook">task-log-reminder</span></td>
+          <td>UserPromptSubmit</td>
+          <td>
+            On every human message, reminds the agent to log progress to
+            TASK_LOG.md. Prevents progress from living only in the conversation.
+          </td>
+        </tr>
+      </table>
+
+      <div class="callout warn">
+        Hooks are <em>bespoke to your team's workflow</em>. Don't copy someone
+        else's hook repository &mdash; build hooks that enforce
+        <em>your</em> conventions. The power is in the specificity: these five
+        hooks encode exactly how we want agents to behave.
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Compaction-Proof Memory -->
+    <div class="slide" id="memory">
+      <span class="slide-number">08</span>
+      <h2>Compaction-Proof Memory</h2>
+      <p class="subtitle">
+        When the context window fills up, the system auto-compresses. Your work
+        survives because it's on disk.
+      </p>
+
+      <div class="three-col">
+        <div class="col-card">
+          <h3>The Problem</h3>
+          <ul>
+            <li>LLM context windows are finite</li>
+            <li>Long sessions trigger auto-compaction</li>
+            <li>Compaction summarizes &amp; drops details</li>
+            <li>Agent "forgets" what it was doing</li>
+            <li>You re-explain the same thing again</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h3>The Solution</h3>
+          <ul>
+            <li>
+              <span class="tag file">CLAUDE.md</span> &rarr; loaded every turn
+              (Active Tasks table)
+            </li>
+            <li>
+              <span class="tag file">SPEC_vN.md</span> &rarr; scope &amp;
+              constraints on disk
+            </li>
+            <li>
+              <span class="tag file">TASK_LOG.md</span> &rarr; progress
+              narrative on disk
+            </li>
+            <li>
+              <span class="tag file">FINDINGS_REGISTRY.md</span> &rarr; all
+              discoveries on disk
+            </li>
+            <li>
+              <span class="tag file">MEMORY.md</span> &rarr; persistent
+              cross-session notes
+            </li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h3>The Result</h3>
+          <ul>
+            <li>Agent reads 4 files &rarr; fully recovered</li>
+            <li>Survives context compaction</li>
+            <li>Survives session crashes</li>
+            <li>Survives model swaps</li>
+            <li>Survives multi-day work</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pattern-card" style="margin-top: 24px">
+        <h3>CLAUDE.md: The Most Powerful Config Surface</h3>
+        <p>
+          CLAUDE.md is loaded into every conversation as system context. It's
+          effectively a persistent system prompt you control. Put your Active
+          Tasks table here and the agent always knows what it's working on.
+        </p>
+        <div class="pattern-example">
+          ## Active Tasks | Run ID | Description | Status |
+          |---------------------------------|----------------------|-------------|
+          | RUN-20260304-1112-feature-auth | Auth system overhaul | In Progress
+          | | RUN-20260303-0900-api-refactor | REST → GraphQL | Review | → Agent
+          reads this on EVERY turn → Knows what it's working on, even after
+          compaction → Self-updating: agent edits this table as work progresses
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Model Selection -->
+    <div class="slide" id="models">
+      <span class="slide-number">09</span>
+      <h2>Model Selection: Right Tool for the Right Job</h2>
+      <p class="subtitle">
+        Not "use the best model for everything" &mdash; use the
+        <em style="color: var(--accent2)">right</em> model for each task.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat-card" style="border-top: 3px solid var(--accent4)">
+          <div class="stat-number yellow" style="font-size: 28px">Haiku</div>
+          <div class="stat-label" style="margin-top: 12px; text-align: left">
+            <strong>Fast &amp; cheap.</strong><br />
+            Scaffolding, boilerplate, file creation, validation checks,
+            docstring audits. Tasks where speed matters more than depth.
+          </div>
+        </div>
+        <div class="stat-card" style="border-top: 3px solid var(--accent2)">
+          <div class="stat-number green" style="font-size: 28px">Sonnet</div>
+          <div class="stat-label" style="margin-top: 12px; text-align: left">
+            <strong>Capable &amp; efficient.</strong><br />
+            Implementation, code generation, standard analysis, technical
+            reviews. The workhorse for most tasks.
+          </div>
+        </div>
+        <div class="stat-card" style="border-top: 3px solid var(--accent)">
+          <div class="stat-number" style="font-size: 28px">Opus</div>
+          <div class="stat-label" style="margin-top: 12px; text-align: left">
+            <strong>Deep reasoning.</strong><br />
+            Complex parsing, architectural decisions, adversarial review,
+            strategic analysis. When nuance and thoroughness matter.
+          </div>
+        </div>
+        <div class="stat-card" style="border-top: 3px solid var(--accent3)">
+          <div class="stat-number red" style="font-size: 28px">Other</div>
+          <div class="stat-label" style="margin-top: 12px; text-align: left">
+            <strong>Independent perspective.</strong><br />
+            Cross-model review (GPT, Gemini, etc). Different training =
+            different blind spots. Use for adversarial diversity.
+          </div>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top: 32px">
+        Multi-model review isn't about finding the "best" model. It's about
+        <em>covering different blind spots</em>. In practice: Opus asks
+        strategic questions others miss. Sonnet writes proof code. External
+        models bring genuinely different training biases. Use this to your
+        advantage.
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Reusable Patterns -->
+    <div class="slide" id="patterns">
+      <span class="slide-number">10</span>
+      <h2>Reusable Orchestration Patterns</h2>
+      <p class="subtitle">Building blocks you can compose for any project.</p>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <h3>Scout &rarr; Build &rarr; Review</h3>
+          <p>
+            The basic pattern. A scout investigates, a builder implements, a
+            reviewer catches bugs. Each writes FINDINGS.md in their own
+            directory.
+          </p>
+          <div class="pattern-example">
+            1. Scout (Explore agent) → Reads codebase, writes FINDINGS.md →
+            "Here's how auth currently works" 2. Builder (general-purpose agent)
+            → Reads scout's findings, implements → Writes code + FINDINGS.md 3.
+            Reviewer (Opus, adversarial) → Reads builder's output → Catches
+            bugs, writes FINDINGS.md
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Analyst Council</h3>
+          <p>
+            Multiple agents with different roles examine the same data
+            independently. No access to each other's analysis or the plan.
+            Surfaces things no single perspective would find.
+          </p>
+          <div class="pattern-example">
+            Council Members (all Opus): → Statistician: quantitative patterns →
+            Process Engineer: operational gaps → Storyteller: narrative
+            coherence → Skeptic: challenges all claims Key: No shared context
+            between members. Each works independently. Orchestrator synthesizes
+            findings.
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Dependency Chain</h3>
+          <p>
+            Multi-agent team with explicit dependency ordering. Scaffold first,
+            then parallel implementation, then capstone. Each step reads the
+            outputs of its dependencies.
+          </p>
+          <div class="pattern-example">
+            Step 1: Scaffold [Haiku] ↓ Step 2a: Parser A [Sonnet] ──┐ Step 2b:
+            Parser B [Opus] ──┤ ↓ │ Step 3a: Analysis [Sonnet] ←─┤ Step 3b:
+            Assessment [Sonnet] ←─┘ ↓ Step 4: Capstone [Sonnet] (reads ALL prior
+            FINDINGS)
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Multi-Model Review</h3>
+          <p>
+            Same deliverable reviewed by different model families. Each model
+            has different training biases and blind spots. Synthesis captures
+            what each uniquely found.
+          </p>
+          <div class="pattern-example">
+            Same document → 3 reviewers: Claude Opus → Strategic questions "Are
+            we building what the user actually wants?" GPT / Codex → Operational
+            pragmatism "Simplify Phase 1" Claude Sonnet → Proof code "Here's SQL
+            proving this is unnecessary for MVP"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Human Role -->
+    <div class="slide" id="role">
+      <span class="slide-number">11</span>
+      <h2>The Human's Role: Steer, Don't Row</h2>
+      <p class="subtitle">
+        You make decisions. The agents do implementation, analysis, and review.
+      </p>
+
+      <div class="two-col">
+        <div>
+          <div class="numbered-item">
+            <div class="num">1</div>
+            <div class="content">
+              <h4>Define Scope</h4>
+              <p>
+                Write or approve the SPEC. Define what success looks like,
+                constraints, and what not to retry. This is your
+                highest-leverage activity.
+              </p>
+            </div>
+          </div>
+          <div class="numbered-item">
+            <div class="num green">2</div>
+            <div class="content">
+              <h4>Make Architectural Decisions</h4>
+              <p>
+                When agents surface trade-offs or ask strategic questions, you
+                decide. The agents provide analysis; you provide judgment.
+              </p>
+            </div>
+          </div>
+          <div class="numbered-item">
+            <div class="num yellow">3</div>
+            <div class="content">
+              <h4>Review Synthesized Output</h4>
+              <p>
+                Don't review raw code line-by-line. Review the FINDINGS.md
+                summaries, the adversarial review results, and the synthesized
+                conclusions.
+              </p>
+            </div>
+          </div>
+          <div class="numbered-item">
+            <div class="num red">4</div>
+            <div class="content">
+              <h4>Evolve the System</h4>
+              <p>
+                Add new hooks when you see repeated mistakes. Update CLAUDE.md
+                when conventions change. The system improves over time because
+                you refine it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="pattern-card" style="height: 100%">
+            <h3>What You Don't Do</h3>
+            <p>The system handles these so you can focus on decisions.</p>
+            <div
+              class="pattern-example"
+              style="font-size: 14px; line-height: 2"
+            >
+              <span style="color: var(--accent3)">✗</span> Write boilerplate
+              code <span style="color: var(--accent3)">✗</span> Manually enforce
+              conventions
+              <span style="color: var(--accent3)">✗</span> Re-explain context
+              after compaction
+              <span style="color: var(--accent3)">✗</span> Review every line of
+              agent output
+              <span style="color: var(--accent3)">✗</span> Coordinate agent
+              communication <span style="color: var(--accent3)">✗</span> Track
+              progress in your head
+              <span style="color: var(--accent3)">✗</span> Remember what failed
+              last time
+
+              <span style="color: var(--accent2)">→</span> Hooks enforce
+              conventions <span style="color: var(--accent2)">→</span> CLAUDE.md
+              + disk files = memory
+              <span style="color: var(--accent2)">→</span> Adversarial review =
+              quality gate <span style="color: var(--accent2)">→</span> SPEC
+              "Don't Retry" = no loops
+              <span style="color: var(--accent2)">→</span> File protocol =
+              coordination <span style="color: var(--accent2)">→</span> TASK_LOG
+              = progress tracking
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Getting Started -->
+    <div class="slide" id="start">
+      <span class="slide-number">12</span>
+      <h2>Getting Started</h2>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <h3>Step 1: CLAUDE.md</h3>
+          <p>
+            Start here. This is your system prompt. Add your conventions, active
+            tasks table, and workflow instructions. Every conversation will see
+            it.
+          </p>
+          <div class="pattern-example">
+            ## Workflow - Clarify scope → Init run → Build → Review ## Active
+            Tasks | Run ID | Description | Status |
+            |--------|-------------|--------| | (none) | | | ## Conventions -
+            Always use TypeScript strict mode - Test before committing - Log
+            progress to TASK_LOG.md
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Step 2: Run Directory</h3>
+          <p>
+            Create your first run directory with init-run.sh. Fill in the SPEC
+            template. Now the agent has a place to work that survives
+            everything.
+          </p>
+          <div class="pattern-example">
+            $ ./runs/CLAUDE-RUNS/init-run.sh my-task # Fill in SPEC_v1.md: ##
+            Objective What we're building and why. ## Success Criteria 1. All
+            tests pass 2. Documentation updated ## Constraints - No new
+            dependencies - Must work with existing auth
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Step 3: Hooks</h3>
+          <p>
+            Install the hooks that match your workflow. Start with the directory
+            protocol hook (most impactful) and add others as you need them.
+          </p>
+          <div class="pattern-example">
+            // settings.local.json { "hooks": { "PreToolUse": [{ "event":
+            "Task", "command": "python .claude/hooks/
+            subagent-directory-protocol.py" }], "UserPromptSubmit": [{
+            "command": "python .claude/hooks/ task-log-reminder.py" }] } }
+          </div>
+        </div>
+        <div class="pattern-card">
+          <h3>Step 4: Iterate</h3>
+          <p>
+            Run your first task through the system. See what works, what's
+            friction. Add hooks for mistakes that repeat. Evolve CLAUDE.md as
+            conventions solidify.
+          </p>
+          <div class="pattern-example">
+            Week 1: CLAUDE.md + run directories → Basic structure, manual
+            reminders Week 2: Add directory protocol hook → Subagents
+            auto-organize Week 3: Add adversarial review step → Catch bugs
+            before delivery Week 4: Add task-log reminder hook → Progress always
+            tracked Ongoing: Refine based on what actually goes wrong
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Closing -->
+    <div
+      class="slide"
+      style="justify-content: center; align-items: center; text-align: center"
+    >
+      <span class="slide-number">13</span>
+      <h1>The System Is the Product</h1>
+      <p class="subtitle" style="max-width: 700px">
+        The AI models will keep improving. The orchestration system &mdash;<br />
+        run directories, SPEC versioning, hooks, multi-agent coordination,<br />
+        compaction-proof memory &mdash; is what makes that power
+        <em style="color: var(--accent2)">usable</em>,<br />
+        <em style="color: var(--accent2)">reliable</em>, and
+        <em style="color: var(--accent2)">reproducible</em>.
+      </p>
+
+      <div
+        style="
+          margin-top: 48px;
+          padding: 28px 48px;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          display: inline-block;
+        "
+      >
+        <p class="muted small" style="margin-bottom: 12px">THE STACK</p>
+        <div
+          style="
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <div style="text-align: center">
+            <div style="font-size: 28px; margin-bottom: 4px">&#x1f4c4;</div>
+            <div style="font-size: 13px; font-weight: 600">CLAUDE.md</div>
+            <div style="font-size: 11px; color: var(--muted)">
+              System prompt
+            </div>
+          </div>
+          <div style="color: var(--muted)">+</div>
+          <div style="text-align: center">
+            <div style="font-size: 28px; margin-bottom: 4px">&#x1f4c1;</div>
+            <div style="font-size: 13px; font-weight: 600">RUN dirs</div>
+            <div style="font-size: 11px; color: var(--muted)">
+              Durable state
+            </div>
+          </div>
+          <div style="color: var(--muted)">+</div>
+          <div style="text-align: center">
+            <div style="font-size: 28px; margin-bottom: 4px">&#x1f510;</div>
+            <div style="font-size: 13px; font-weight: 600">Hooks</div>
+            <div style="font-size: 11px; color: var(--muted)">Guardrails</div>
+          </div>
+          <div style="color: var(--muted)">+</div>
+          <div style="text-align: center">
+            <div style="font-size: 28px; margin-bottom: 4px">&#x1f916;</div>
+            <div style="font-size: 13px; font-weight: 600">Agents</div>
+            <div style="font-size: 11px; color: var(--muted)">Execution</div>
+          </div>
+          <div style="color: var(--muted)">+</div>
+          <div style="text-align: center">
+            <div style="font-size: 28px; margin-bottom: 4px">
+              &#x1f9d1;&#x200d;&#x1f4bb;
+            </div>
+            <div style="font-size: 13px; font-weight: 600">You</div>
+            <div style="font-size: 11px; color: var(--muted)">Decisions</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="muted small" style="margin-top: 40px">
+        4th Layer Engineering &middot; Dan Guilliams &middot; 4th Layer
+        Engineering &middot; 2026
+      </p>
+    </div>
+  </body>
+</html>
