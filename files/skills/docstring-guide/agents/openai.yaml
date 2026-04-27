@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docstring Guide"
+  short_description: "Required before substantive code edits"
+  default_prompt: "Use $docstring-guide before writing or editing code so docstrings, navigation refs, and test traceability stay accurate."

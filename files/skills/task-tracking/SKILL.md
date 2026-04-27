@@ -5,7 +5,7 @@ description: "HIGHLY RECOMMENDED for all non-trivial work. Structured run tracki
 
 # Task Tracking Skill
 
-Structured run tracking for Claude Code sessions. Creates timestamped run directories
+Structured run tracking for coding-agent sessions. Creates timestamped run directories
 with SPEC versioning, continuous TASK_LOG, HANDOFF docs at completion, and memory
 promotion on archival.
 
@@ -28,7 +28,7 @@ When the user wants to start a tracked task:
 
 Then:
 
-1. Add entry to the **Active Tasks** table in CLAUDE.local.md
+1. Add entry to the **Active Tasks** table in `CLAUDE.local.md` (Claude) or `AGENTS.local.md` (Codex)
 2. Fill in `SPEC_v1.md` with scope and constraints
 3. Update `TASK_LOG.md` continuously as you work
 4. At completion, invoke the `archive-run` skill
@@ -107,9 +107,9 @@ To re-enable: delete `.claude/task-tracking.disabled`
 
 ## Overview
 
-This protocol enables Claude Code instances to track their work across sessions and
-parallel workstreams by **dynamically updating CLAUDE.md** and maintaining structured
-run directories.
+This protocol enables coding-agent instances to track their work across sessions and
+parallel workstreams by **dynamically updating the Active Tasks table in local runtime state**
+(per-machine, gitignored) and maintaining structured run directories on disk.
 
 ---
 
@@ -128,14 +128,15 @@ When beginning work (bug fix, feature, analysis, etc.):
    # Creates: RUN-YYYYMMDD-HHMM-fix-auth-bug/ with templated files
    ```
 
-2. **Read Subagent Guide (for investigation/verification tasks):**
+2. **Use subagent-management (for investigation/verification tasks):**
 
-   [`docs/coding_agents/SUBAGENT_GUIDE.md`](docs/coding_agents/SUBAGENT_GUIDE.md)
+   If the `subagent-management` skill is installed, load it before delegating
+   investigation or verification work.
 
    **Key pattern:** Subagents write to their own `subagents/YYYYMMDD-HHMM-slug/` directory.
    Main thread reads `FINDINGS.md` files afterward (file-based, not context-based).
 
-3. **Update Active Tasks in `CLAUDE.local.md`:**
+3. **Update Active Tasks in local runtime state:**
    - Add new entry with Run ID, status, context
    - Mark as "In Progress"
 
@@ -177,7 +178,7 @@ After compaction or instance swap, re-read the current SPEC version to recover w
 
 When you believe a task is complete:
 
-**❌ DO NOT automatically remove the task from CLAUDE.local.md**
+**❌ DO NOT automatically remove the task from local runtime state**
 
 Instead:
 
@@ -195,6 +196,9 @@ Instead:
 3. **Validate Docstrings (MANDATORY):**
    - Create `docstring_validation.md` in the run directory
    - Audit ALL files modified during this run
+   - If the `docstring-guide` skill is installed, load it before implementation
+     for code-changing runs and again before validating or updating public
+     docstrings/navigation references
    - Format: See `templates/docstring_validation_template.md` in this skill
    - **BLOCKING:** Resolve all discrepancies before proceeding
 
@@ -258,11 +262,11 @@ Instead:
    - [candidate 2] → ...
    (or "No memory candidates")
 
-   May I archive this task and remove it from Active Tasks in CLAUDE.local.md?"
+   May I archive this task and remove it from Active Tasks in local runtime state?"
    ```
 
 7. **If User Approves — invoke the `archive-run` skill** which will guide you through:
-   - Removing task entry from "Active Tasks" in CLAUDE.local.md
+   - Removing task entry from "Active Tasks" in local runtime state
    - Promoting approved memory candidates from HANDOFF.md
    - Running project-specific metrics collection
    - Adding entry to `runs/CLAUDE-RUNS/ARCHIVE.md`
@@ -278,7 +282,7 @@ Instead:
 1. **Active Tasks Limit:** Maximum 5 active tasks. If starting a 6th, ask if any can be archived.
 2. **Completion Confirmation:** ALWAYS ask user permission before removing from Active Tasks.
 3. **Archive Process:**
-   - Completed tasks removed from CLAUDE.local.md upon user approval
+   - Completed tasks removed from local runtime state upon user approval
    - Working directories remain in `runs/CLAUDE-RUNS/<RUN-ID>-<slug>/` indefinitely
    - Add entry to TOP of `runs/CLAUDE-RUNS/ARCHIVE.md` (newest first)
    - Never delete working directories without explicit user permission
@@ -441,11 +445,11 @@ Multiple citations on one memory = higher confidence (reinforced by experience).
 
 # Parallel Instance Disambiguation
 
-Rules for running multiple Claude Code instances on the same repo.
+Rules for running multiple coding-agent instances on the same repo.
 
 ## Declare Your Instance
 
-When running multiple Claude Code instances:
+When running multiple coding-agent instances:
 
 ```markdown
 **Agent Instance:** Terminal 1 (Git Bash)
@@ -476,6 +480,7 @@ After compaction or instance swap:
 ## Related Skills
 
 - **`archive-run`** — invoke at task completion for archival checklist + metrics
+- **`docstring-guide`** — load before code-changing work and before docstring validation
 - **`adversarial-review`** — propose before archiving non-trivial work
 - **`cursor-subagent`** / **`codex-subagent`** / **`gemini-subagent`** — for delegating investigation/verification
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claude Code adapter for shared destructive git guardrail."""
+"""Codex adapter for shared destructive git guardrail."""
 import json
 import subprocess
 import sys
@@ -35,21 +35,12 @@ def main():
             print(json.dumps({
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "permissionDecision": "block",
+                    "permissionDecision": "deny",
                     "permissionDecisionReason": reason,
                 }
             }))
-            return
-
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-                "permissionDecisionReason": "Command is not a blocked destructive git operation.",
-            }
-        }))
     except Exception as e:
-        sys.stderr.write(f"Hook error (claude block-destructive-git): {e}\n")
+        sys.stderr.write(f"Hook error (codex block-destructive-git): {e}\n")
         sys.exit(0)
 
 

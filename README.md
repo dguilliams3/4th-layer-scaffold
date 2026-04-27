@@ -46,18 +46,26 @@ See [SETUP.md](SETUP.md) for the post-install checklist (your agent runs this).
 
 | Category             | What                             | Purpose                                                                                                     |
 | -------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Hooks** (7)        | `.claude/hooks/`                 | Agent type enforcement, git safety, session continuity, subagent protocol, task log reminders               |
-| **Skills** (7)       | `skills/` or `~/.claude/skills/` | Task tracking, archival, subagent invocation (Codex/Cursor/Gemini), adversarial review, multi-model council |
-| **Docs** (5)         | `docs/coding_agents/`            | Subagent guide, Gemini CLI reference, council protocol, adversarial review, context optimization            |
-| **Runtime state**    | `CLAUDE.local.md`                | Active Tasks table + optional Agent Voice (gitignored)                                                      |
-| **Workflow pointer** | CLAUDE.md section                | ~116-line slim pointer to the task-tracking skill                                                           |
-| **Run infra**        | `runs/CLAUDE-RUNS/`              | Gitignored directory for run artifacts (SPEC, TASK_LOG, HANDOFF)                                            |
+| **Claude hooks** (7) | `.claude/hooks/`                 | Agent type enforcement, git safety, session continuity, subagent protocol, task log reminders               |
+| **Codex hooks** (3)  | `.codex/hooks/`                  | Git safety, session continuity, task log reminders                                                          |
+| **Shared hook logic** | `.agent-harness/hooks/`         | Runtime-neutral Python logic used by Claude and Codex hook adapters                                         |
+| **Skills** (10)      | Global by default: `~/.claude/skills/` and/or `~/.agents/skills/`; project-local only on request: `skills/` or `.agents/skills/` | Task tracking, context loading, docstring navigation, archival, subagent management/invocation, adversarial review, multi-model council |
+| **Docs**             | Workflow snippets + skill bodies | Agent workflow guidance now lives in skills; repo instruction snippets point agents to those skills         |
+| **Runtime state**    | `CLAUDE.local.md`, `AGENTS.local.md` | Active Tasks table + optional local notes (gitignored)                                                  |
+| **Workflow pointer** | CLAUDE.md / AGENTS.md sections   | Slim pointers to the task-tracking skill                                                                    |
+| **Run infra**        | `runs/CLAUDE-RUNS/`              | Gitignored directory for run artifacts plus tracked `ARCHIVE.template.md`                                   |
 
 ### Key Skills
 
 **`task-tracking`** -- Structured run tracking with SPEC versioning, continuous TASK_LOG, HANDOFF docs at completion, and memory promotion on archival. Opt-out, not opt-in.
 
+**`context-loading`** -- Minimal, search-first file/doc loading with partial reads, cached summaries, and composed shell command patterns.
+
+**`docstring-guide`** -- Required before substantive code edits: AI-friendly docstring navigation with typed `Navigation` tags, `file::symbol` references, test traceability, and stale-comment cleanup.
+
 **`archive-run`** -- Guided archival with metric collection (git/python/node/go/rust), memory candidate triage, and ARCHIVE.md entry generation.
+
+**`subagent-management`** -- Delegation decisions, subagent prompt structure, run-directory protocol, and FINDINGS.md integration.
 
 ---
 
@@ -69,19 +77,27 @@ See [SETUP.md](SETUP.md) for the post-install checklist (your agent runs this).
 ├── SETUP.md                          # Post-install checklist
 ├── files/                            # Everything that gets copied to target repos
 │   ├── CLAUDE.local.md               # Active Tasks + Agent Voice template
+│   ├── AGENTS.local.md               # Codex local runtime state template
+│   ├── .agent-harness/hooks/         # Shared hook logic
 │   ├── .claude/hooks/                # 7 agent behavior hooks
 │   ├── .claude/settings-hooks-template.json
-│   ├── docs/coding_agents/           # Subagent, council, review, and memory guides
+│   ├── .codex/hooks/                 # 3 Codex-compatible hooks
+│   ├── .codex/hooks.json
+│   ├── .codex/config-hooks-template.toml
+│   ├── runs/                         # .gitkeep + ARCHIVE.template.md
 │   └── skills/                       # Installable skills
 │       ├── task-tracking/            # Run tracking protocol, templates, init-run.sh
+│       ├── context-loading/          # Minimal file/doc loading strategy
+│       ├── docstring-guide/          # AI-friendly docstring navigation grammar
 │       ├── archive-run/              # Archival checklist, metric collectors
+│       ├── subagent-management/      # Delegation protocol and FINDINGS integration
 │       ├── codex-subagent/           # Codex CLI invocation patterns
 │       ├── cursor-subagent/          # Cursor agent invocation patterns
 │       ├── gemini-subagent/          # Gemini CLI invocation patterns
 │       ├── adversarial-review/       # Skeptical-but-fair multi-model review
 │       └── council-guide/            # Multi-model council deliberation
 ├── optional/                         # Language/CI-specific hooks (Python, GitHub Actions)
-└── snippets/                         # CLAUDE.md workflow section to paste
+└── snippets/                         # CLAUDE.md and AGENTS.md workflow sections to paste
 ```
 
 ---
@@ -99,8 +115,11 @@ See [SETUP.md](SETUP.md) for the post-install checklist (your agent runs this).
 ## Design Principles
 
 - **Task tracking is a skill, not inline.** The full protocol (~540 lines) lives in `task-tracking/SKILL.md`, loaded on-demand. CLAUDE.md gets a ~116-line pointer. Saves ~2,500 tokens per session that doesn't need tracking.
-- **Active Tasks live in CLAUDE.local.md.** Gitignored in target repos -- no merge conflicts, no git noise. Same system prompt visibility as CLAUDE.md.
-- **Opt-out, not opt-in.** The `session-run-prompt` hook enforces task-tracking by default. Disable per-repo with `.claude/task-tracking.disabled`.
+- **Runtime state stays local.** Claude uses `CLAUDE.local.md`; Codex uses `AGENTS.local.md` through the harness `SessionStart` hook, not native instruction discovery. Both are gitignored in target repos.
+- **Skills are global by default.** Install Claude skills under `~/.claude/skills/` and Codex skills under `~/.agents/skills/`. Only add project-local `skills/` or `.agents/skills/` when the user explicitly asks for repo-specific skill copies.
+- **Codex uses Codex-native files.** Codex-facing workflow guidance belongs in `AGENTS.md`; optional repo-local Codex skills live in `.agents/skills/`; Codex hooks live in `.codex/`.
+- **Project-local Codex hooks require trust.** Codex only loads repo `.codex/` hooks from trusted project config layers; review hook scripts before trusting a new repo config.
+- **Opt-out, not opt-in.** The `session-run-prompt` hook enforces task-tracking by default. Disable per-repo with `.claude/task-tracking.disabled` for Claude or `.codex/task-tracking.disabled` for Codex.
 - **Run artifacts are ephemeral.** The `runs/` directory is gitignored. Like build output, it's generated by the toolchain and never committed.
 
 ---

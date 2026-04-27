@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claude Code adapter for shared TASK_LOG reminder context."""
+"""Codex adapter for shared TASK_LOG reminder context."""
 import json
 import subprocess
 import sys
@@ -34,7 +34,7 @@ def main():
             }
         }))
     except Exception as e:
-        sys.stderr.write(f"Hook error (claude task-log-reminder): {e}\n")
+        sys.stderr.write(f"Hook error (codex task-log-reminder): {e}\n")
         sys.exit(0)
 
 

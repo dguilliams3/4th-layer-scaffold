@@ -1,6 +1,20 @@
+# Claude agent runtime state (per-machine, never committed)
+# — Active Tasks table, Agent Voice persona, local notes
+/CLAUDE.local.md
+
+# Codex agent runtime state (per-machine, never committed)
+/AGENTS.local.md
+
 # Claude agent run directories (local only — contents never committed)
+# Alternate path conventions in field repos: `run/CLAUDE-RUNS/` (singular),
+# `runs/` (flat, no subdir), `temp/CLAUDE-RUNS/` (POC). Adjust if applicable.
 runs/
 !runs/.gitkeep
+!runs/CLAUDE-RUNS/.gitkeep
+!runs/CLAUDE-RUNS/ARCHIVE.template.md
+
+# Note: ARCHIVE.md and any ARCHIVE-YYYY-MM.md files stay ignored (per-dev archive history).
+# Only ARCHIVE.template.md is tracked — see archive-run skill Step 4.5 for monthly rotation.
 
 # Log files
 *.log

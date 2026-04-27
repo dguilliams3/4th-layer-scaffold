@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claude Code adapter for shared session run-state context."""
+"""Codex adapter for shared session run-state context."""
 import json
 import subprocess
 import sys
@@ -30,15 +30,17 @@ def main():
 
         context = build_session_context(
             repo_root=repo_root,
-            runtime_name="Claude Code",
-            local_state_names=["CLAUDE.local.md"],
-            disabled_paths=[Path(".claude/task-tracking.disabled")],
-            skill_reference="the `task-tracking` skill",
+            runtime_name="Codex",
+            local_state_names=["AGENTS.local.md", "CLAUDE.local.md"],
+            disabled_paths=[
+                Path(".codex/task-tracking.disabled"),
+                Path(".claude/task-tracking.disabled"),
+            ],
+            skill_reference="`$task-tracking`",
             disable_instruction=(
-                "If the user wants to disable permanently for Claude Code in this repo, "
-                "create `.claude/task-tracking.disabled`."
+                "To disable for Codex in this repo, create `.codex/task-tracking.disabled`."
             ),
-            require_local_state=True,
+            require_local_state=False,
         )
         if context is None:
             sys.exit(0)
@@ -50,7 +52,7 @@ def main():
             }
         }))
     except Exception as e:
-        sys.stderr.write(f"Hook error (claude session-run-prompt): {e}\n")
+        sys.stderr.write(f"Hook error (codex session-run-prompt): {e}\n")
         sys.exit(0)
 
 

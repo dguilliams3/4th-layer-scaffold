@@ -50,7 +50,8 @@ Create `FINDINGS.md` in your directory with this structure:
 - Test scripts, SQL queries, debug output, intermediate data
 - These help reproducibility but stay in YOUR directory
 
-**Template Reference:** `docs/coding_agents/claude_run_templates/FINDINGS/FINDINGS.md`
+**Template Reference:** `skills/task-tracking/templates/FINDINGS.md` when the task-tracking
+skill is installed project-local, or the global `task-tracking` skill's `templates/FINDINGS.md`.
 
 ---
 

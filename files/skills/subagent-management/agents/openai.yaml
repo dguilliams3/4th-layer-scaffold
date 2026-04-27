@@ -1,0 +1,4 @@
+interface:
+  display_name: "Subagent Management"
+  short_description: "Plan and coordinate subagent work"
+  default_prompt: "Use $subagent-management before spawning subagents to plan delegation, directories, and FINDINGS.md outputs."
