@@ -7,6 +7,10 @@
 
 This repo uses structured run tracking via the `task-tracking` skill. Enabled by default.
 
+- **Session/context loading:** invoke the `context-loading` skill at session start,
+  after compaction/resume, or before broad repo/doc exploration.
+- **Docstrings/navigation:** use the `docstring-guide` skill before any task
+  that writes or edits actual code.
 - **Start a run:** invoke the `task-tracking` skill with a slug
 - **Archive a run:** invoke the `archive-run` skill with the RUN-ID
 - **Opt out permanently:** create `.claude/task-tracking.disabled`
@@ -18,9 +22,10 @@ HANDOFF docs, memory promotion, subagent directory conventions, and completion c
 
 ## Subagent Usage
 
-> **Complete Guide:** [`docs/coding_agents/SUBAGENT_GUIDE.md`](docs/coding_agents/SUBAGENT_GUIDE.md)
-
 Use subagents PROACTIVELY. The cost of spawning is low; the cost of context pollution is high.
+
+For delegation decisions, prompt structure, working directories, and result
+integration, use the `subagent-management` skill.
 
 **Always delegate:**
 
@@ -60,15 +65,15 @@ Use subagents PROACTIVELY. The cost of spawning is low; the cost of context poll
 
 ### Codex as Implementation Subagent
 
-See skill: `codex-subagent`
+If installed and relevant, see skill: `codex-subagent`
 
 ### Cursor Agent as Subagent
 
-See skill: `cursor-subagent`
+If installed and relevant, see skill: `cursor-subagent`
 
 ### Gemini CLI as Subagent
 
-See skill: `gemini-subagent`
+If installed and relevant, see skill: `gemini-subagent`
 
 ---
 
@@ -112,5 +117,17 @@ AI agents do NOT have access to real-time clocks. When timestamps are needed:
 1. **Run `date` in terminal** to get accurate system time
 2. **Never hallucinate/guess timestamps** — always verify via command
 3. **Format:** `YYYY-MM-DD HH:MM EST` for documentation, `YYYYMMDD-HHMM` for file/directory names
+
+---
+
+## Harness setup completeness (read before relying on skills or hooks)
+
+This workflow assumes the **4th Layer agent harness** is fully installed: skills globally available under `~/.claude/skills/` unless the user requested project-local `skills/`, shared hook logic in `.agent-harness/hooks/`, and Claude Code **hooks** wired in `.claude/settings.local.json`.
+
+**If you (the agent) cannot load or invoke skills the project references** — e.g. slash-invoked skills like `/task-tracking` or `/adversarial-review` are missing from the environment — **do not pretend the workflow is active.** Review the 4th Layer scaffold repository and **ask the user** whether they want to install or sync the harness (skills + docs + hooks) into this repo.
+
+**If the repo contains `.claude/hooks/` (hook scripts present) but `.agent-harness/hooks/` is missing or `.claude/settings.local.json` does not register those hooks** (or there is no merged `settings-hooks-template.json` wiring), treat hooks as **not active** until the user syncs shared hook logic and merges hook configuration. **Ask the user** before assuming session reminders, subagent protocol injection, or git-safety hooks will run.
+
+> **Note for humans:** `.claude/settings.local.json` is usually gitignored; it is expected that PRs may not include it even when the harness files are committed. Agents should still flag a hooks/scripts vs settings mismatch when they see it.
 
 <!-- END PASTE -->

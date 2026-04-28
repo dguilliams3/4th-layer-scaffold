@@ -1,6 +1,6 @@
 ---
 name: archive-run
-description: "HIGHLY RECOMMENDED when completing a run. Load this skill fresh at archival time to get the completion checklist, project-specific metric collection, ARCHIVE.md entry format, and memory promotion steps with clean context. Pairs with the task-tracking skill. Invoke when a run reaches READY FOR REVIEW status and the user approves archival."
+description: "HIGHLY RECOMMENDED when completing a run. Load this skill fresh at archival time to get the completion checklist, project-specific metric collection, ARCHIVE.md entry format, monthly-rotation policy (entries >2mo age roll to ARCHIVE-YYYY-MM.md files), and memory promotion steps with clean context. Pairs with the task-tracking skill. Invoke when a run reaches READY FOR REVIEW status and the user approves archival."
 ---
 
 # Archive Run Skill
@@ -27,7 +27,8 @@ Work through these steps in order after the user approves archival:
 
 ### 1. Remove from Active Tasks
 
-Delete the task's row from the **Active Tasks** table in CLAUDE.local.md.
+Delete the task's row from the **Active Tasks** table in `CLAUDE.local.md`
+(Claude) or `AGENTS.local.md` (Codex).
 
 ### 2. Promote Memory Candidates
 
@@ -116,12 +117,80 @@ Add an entry to the **TOP** of `runs/CLAUDE-RUNS/ARCHIVE.md` (newest first).
 ---
 ```
 
+### 4.5. Rotate Aged Entries to Monthly Archives
+
+**Policy:** Entries older than **2 calendar months** get moved out of
+`ARCHIVE.md` into dated monthly files (`ARCHIVE-YYYY-MM.md`). This keeps
+`ARCHIVE.md` focused on recent history while preserving the full audit trail.
+
+**When to rotate:** Check at the end of every archival. Most archivals will
+rotate zero entries (only when a month boundary has aged out).
+
+**Threshold calculation:**
+- Today's date minus 2 months = rotation threshold
+- Example: today is 2026-04-17 → threshold is 2026-02-17
+- Any entry with `Archived:` (or `Created:` if Archived is missing) before the
+  threshold gets rotated to its month's file
+
+**Rotation procedure:**
+
+1. Scan `ARCHIVE.md` for entries dated before the threshold
+2. For each aged entry, determine its month from the `Archived:` date
+   (e.g., 2026-01-15 → `2026-01`)
+3. Append the entry to `runs/CLAUDE-RUNS/ARCHIVE-YYYY-MM.md` (create if
+   missing, using the monthly file template below)
+4. Remove the entry from `ARCHIVE.md`
+5. Add or update an Index section at the bottom of `ARCHIVE.md` listing the
+   monthly files that now exist (newest first):
+
+   ```markdown
+   ---
+
+   ## Monthly Archives
+
+   Older entries are rotated to per-month files after they exceed 2 months of age.
+
+   - [`ARCHIVE-2026-02.md`](./ARCHIVE-2026-02.md)
+   - [`ARCHIVE-2026-01.md`](./ARCHIVE-2026-01.md)
+   - [`ARCHIVE-2025-12.md`](./ARCHIVE-2025-12.md)
+   ```
+
+**Monthly file template** (use when creating `ARCHIVE-YYYY-MM.md`):
+
+```markdown
+# Archived Tasks — [Month Year]
+
+> Monthly archive of completed runs. See `ARCHIVE.md` for the master index of
+> current and recent runs. Entries rotated here after 2 months of age per the
+> archive-run skill's rotation policy.
+
+---
+
+<!-- Entries below this line, newest first -->
+```
+
+**Rationale:**
+- `ARCHIVE.md` stays a reasonable size even on long-lived projects
+- Monthly files are naturally narratively coherent (a month's worth of work)
+- Full history is preserved; nothing is ever lost
+- Rotation is deterministic and idempotent — running it multiple times produces
+  the same result
+
+**Gitignore:** Both `ARCHIVE.md` AND `ARCHIVE-YYYY-MM.md` files are
+per-developer working state (gitignored). Only `ARCHIVE.template.md` is
+tracked. Each developer's machine has its own rotation history.
+
+**Skip rotation if:**
+- No entries are older than the threshold (common case — no-op)
+- The user has explicitly opted out (not currently a settings option; add if requested)
+
 ### 5. Verify
 
-- [ ] Task removed from Active Tasks in CLAUDE.local.md
+- [ ] Task removed from Active Tasks in local runtime state
 - [ ] Memory candidates promoted (or marked skip)
 - [ ] Metrics collected (or N/A if no config)
 - [ ] ARCHIVE.md entry added at top
+- [ ] **Aged entries rotated to monthly files** (or no-op if none aged out)
 - [ ] Working directory kept intact (never auto-delete)
 
 ---
