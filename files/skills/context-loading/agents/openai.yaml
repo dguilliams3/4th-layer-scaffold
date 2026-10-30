@@ -1,0 +1,4 @@
+interface:
+  display_name: "Context Loading"
+  short_description: "Load files and docs with minimal context"
+  default_prompt: "Use $context-loading before starting this session or after compaction to decide what files and docs to read."
